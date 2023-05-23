@@ -17,6 +17,10 @@ Both ***Download.db*** and ***Subtitle_My_Cache*** must be in the same folder as
 
 Using this script, it would turn the file downloaded from MovieBoxPro, "Man of Steel_1604_1080p.mp4" into "Man of Steel (2013).mp4" and would fetch the priortized subtitles for it.
 
+TV shows are whole separate beast in terms of functionality, the download layout being: 
+- Original: Breaking Bad_1234 --> season_1 -- > 1.mp4, 2.mp4, 3.mp4, etc..
+- Converted: Breaking Bad (2008) --> Season 01 --> Pilot S01E01.mp4, Cat's in the Bag... S01E02.mp4, etc..
+
 I will be adding support for tv shows, but I have a few more movies to go before I do that.
 
 ## Errors, bugs, and general documentation
