@@ -11,7 +11,7 @@ movies, subs, index_errors, fileerrors = 0, 0, 0, 0
 
 
 def clean_title(title):
-    """ Turns Goodfellas_1234_1080p.mp4 into Goodfellas.mp4 """
+    """ Turns Goodfellas_1234_1080p.mp4 into Goodfellas """
     media = re.search(r'^(.*?)_[0-9]+_[^_]+$', title)
     if media:
         return media.group(1).replace('_', '')
@@ -28,6 +28,7 @@ def get_subtitles(media_path, media_id, tvshow=False):
                 pass
             else:
                 try:
+                    # hardcoded english subtitles but just change en to whatever language you prefer, jp for japanese as an example.
                     shutil.copy2(str(subdir) + '\\en\\' + subtitles, str(media_path).replace(media_path.name, clean_title(media_path.name) + ' (' + year + ').srt'))
                 except FileNotFoundError:
                     continue
@@ -40,11 +41,14 @@ def get_media_details(media_id, media_list, is_tv=False):
     for m in media_list:
         if media_id in str(m[0]):
             if is_tv:
+                # m[10] = season number, m[11] = episode number, m[13] = episode title
                 if m[10] is None or m[11] is None or m[13] is None: continue
 
                 return m[10], m[11], m[13]
             else:
+                # m[1] = url containing the year of the media, m[18] = prioritized subtitle file
                 if m[1] is None or m[18] is None: continue
+
                 try:
                     return str(m[1]).split('/movie.' + media_id + '.')[1][:4], m[18]
                 except IndexError:
@@ -60,6 +64,14 @@ def read_download_db(database):
     db_con.close()
 
     return media_list
+
+
+if not movieboxpro.exists(): exit('MovieBoxPro directory does not exist or has not been found!')
+if not Path(download_database).exists(): exit('Download.db file does not exist or has not been found!')
+# the mistake I just made that warranted these checks to avoid future problems (and tedious work)..
+if not subtitle_cache.exists():
+    if input('Subtitles directory does not exist or has not be found continue? (y or any): ') != 'y':
+        exit('Subtitle directory not found, exiting.')
 
 for main in movieboxpro.glob('*'):
     if main.is_dir() and '_' in main.name:
@@ -83,7 +95,3 @@ if index_errors > 0:
 if fileerrors > 0:
     print('Noted ' + str(fileerrors) + ' file errors, please check that the media and subtitle files are working.')
     print('If you also received indexing errors and the values are equal, these can likely be ignored.')
-
-print('\nTheres a small chance that the subtitles might not work with the media and MovieBoxPro is to blame for prioritizing the incorrect srt.')
-print('Using my own data as an example I converted 200 movies and only 3 of them had subtitle issues.')
-print('Thats a 1.5% chance the subtitles will be bad.')
