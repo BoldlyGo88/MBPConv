@@ -21,8 +21,6 @@ TV shows are whole separate beast in terms of functionality, the download layout
 - Original: Breaking Bad_1234 --> season_1 -- > 1.mp4, 2.mp4, 3.mp4, etc..
 - Converted: Breaking Bad (2008) --> Season 01 --> Pilot S01E01.mp4, Cat's in the Bag... S01E02.mp4, etc..
 
-I will be adding support for tv shows, but I have a few more movies to go before I do that.
-
 ## Errors, bugs, and general documentation
 
 With my testing i've come across a few bugs that aren't that much of a pain, but could be a little annoying at times, i'll list them below.
