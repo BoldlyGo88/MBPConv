@@ -1,13 +1,14 @@
+import os
 import re
 import shutil
 import sqlite3
 from pathlib import Path
 
 
-movieboxpro = Path('C:\\Users\\happy\\Videos\\MovieBoxPro')
+movieboxpro = Path('C:\\Users\\happy\\Videos\\MovieBoxPro\\batch2')
 subtitle_cache = Path(str(movieboxpro) + '\\subby')
 download_database = str(movieboxpro) + '\\Download.db'
-movies, subs, index_errors, fileerrors = 0, 0, 0, 0
+movies, show, subs, index_errors, fileerrors = 0, 0, 0, 0, 0
 
 
 def clean_title(title):
@@ -17,34 +18,46 @@ def clean_title(title):
         return media.group(1).replace('_', '')
 
 
-def get_subtitles(media_path, media_id, tvshow=False):
+def get_subtitles(media_path, media_id):
     """ Returns the media files year and copies found subtitles to the main folder. Requires Download.db from MovieBoxPro. """
     media_list = read_download_db(download_database)
     year, subtitles = get_media_details(media_id, media_list)
 
     for subdir in subtitle_cache.glob('*'):
         if subdir.is_dir() and media_id in subdir.name:
-            if tvshow:
-                pass
-            else:
-                try:
-                    # hardcoded english subtitles but just change en to whatever language you prefer, jp for japanese as an example.
-                    shutil.copy2(str(subdir) + '\\en\\' + subtitles, str(media_path).replace(media_path.name, clean_title(media_path.name) + ' (' + year + ').srt'))
-                except FileNotFoundError:
-                    continue
+            try:
+                # hardcoded english subtitles but just change en to whatever language you prefer, jp for japanese as an example.
+                shutil.copy2(str(subdir) + '\\en\\' + subtitles, str(media_path).replace(media_path.name, clean_title(media_path.name) + ' (' + year + ').srt'))
+            except FileNotFoundError:
+                continue
 
     return ' (' + year + ')', str(media_path).replace(media_path.name, clean_title(media_path.name) + ' (' + year + ').srt')
 
 
-def get_media_details(media_id, media_list, is_tv=False):
+def get_subtitles_show(media_path, media_id, season, episode):
+    media_list = read_download_db(download_database)
+    season_num, episode_num, episode_title, subtitles = get_media_details(media_id, media_list, season, episode, True)
+
+    for subdir in subtitle_cache.glob('*'):
+        if subdir.is_dir() and media_id in subdir.name:
+            try:
+                shutil.copy2(str(subdir) + '\\Season ' + str(season_num) + '\\Episode ' + str(episode_num) + '\\en\\' + subtitles, str(media_path).replace(media_path.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + '.srt'))
+            except FileNotFoundError:
+                continue
+
+    return season_num, episode_num, episode_title, str(media_path).replace(media_path.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + '.srt')
+
+
+def get_media_details(media_id, media_list, season_num = None, episode_num = None, is_tv=False):
     """ Returns various information on the media file. """
     for m in media_list:
         if media_id in str(m[0]):
             if is_tv:
-                # m[10] = season number, m[11] = episode number, m[13] = episode title
-                if m[10] is None or m[11] is None or m[13] is None: continue
+                # m[10] = season number, m[11] = episode number, m[13] = episode title, m[18] = prioritized subtitle file
+                if m[10] is None or m[11] is None or m[13] is None or m[18] is None or season_num is None or episode_num is None: continue
 
-                return m[10], m[11], m[13]
+                if m[10] == int(season_num) and m[11] == int(episode_num):
+                    return m[10], m[11], m[13], m[18]
             else:
                 # m[1] = url containing the year of the media, m[18] = prioritized subtitle file
                 if m[1] is None or m[18] is None: continue
@@ -70,12 +83,25 @@ if not movieboxpro.exists(): exit('MovieBoxPro directory does not exist or has n
 if not Path(download_database).exists(): exit('Download.db file does not exist or has not been found!')
 # the mistake I just made that warranted these checks to avoid future problems (and tedious work)..
 if not subtitle_cache.exists():
-    if input('Subtitles directory does not exist or has not be found continue? (y or any): ') != 'y':
-        exit('Subtitle directory not found, exiting.')
+    if input('Subtitles directory does not exist or has not be found, continue? (y or any): ') != 'y':
+        exit('Subtitle directory not found!')
 
 for main in movieboxpro.glob('*'):
     if main.is_dir() and '_' in main.name:
-        pass
+        media_id = main.name.rsplit('_', 1)[-1]
+        for seasons in main.iterdir():
+            if seasons.is_dir() and '_' in seasons.name:
+                for episodes in seasons.glob('*.mp4'):
+                    try:
+                        season_num, episode_num, episode_title, tpath = get_subtitles_show(episodes, media_id, re.search(r'\d+', seasons.name).group(), episodes.name.replace('.mp4', ''))
+                        print('Converting: ' + episodes.name, media_id, 'S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2), episode_title)
+                        if Path(tpath).is_file(): subs += 1
+                        shutil.copy2(str(episodes), str(episodes).replace(episodes.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.mp4'))
+                        os.remove(str(episodes))
+                        show += 1
+                    except FileExistsError:
+                        continue
+                seasons.rename(str(seasons).replace(seasons.name, 'Season ' + re.search(r'\d+', seasons.name).group().zfill(2)))
     elif main.is_file() and '_' in main.name and '.mp4' in main.name:
         try:
             media_id = re.search(r'_(\d+)_\d+p', main.name).group(1)
@@ -89,6 +115,8 @@ for main in movieboxpro.glob('*'):
 
 
 print('\nMovies Converted: ' + str(movies))
+print('Episodes Converted: ' + str(show))
+print('Total Media Converted: ' + str(show + movies))
 print('Subtitles Found & Converted: ' + str(subs))
 if index_errors > 0:
     print('Noted ' + str(index_errors) + ' indexing errors, please check that the media and subtitle files are working.')
