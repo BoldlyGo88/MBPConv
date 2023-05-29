@@ -5,10 +5,13 @@ import sqlite3
 from pathlib import Path
 
 
-movieboxpro = Path('C:\\Users\\happy\\Videos\\MovieBoxPro\\batch2')
-subtitle_cache = Path(str(movieboxpro) + '\\subby')
+movieboxpro = Path('C:\\Users\\happy\\Videos\\MovieBoxPro\\batch3')
+subtitle_cache = Path(str(movieboxpro) + '\\Subtitle_Cache\\Subtitle_My_Cache')
 download_database = str(movieboxpro) + '\\Download.db'
 movies, show, subs, index_errors, fileerrors = 0, 0, 0, 0, 0
+
+# change subtitle language here, valid codes found here https://registry-page.isdcf.com/languages/
+subtitle_language = 'en'
 
 
 def clean_title(title):
@@ -26,8 +29,7 @@ def get_subtitles(media_path, media_id):
     for subdir in subtitle_cache.glob('*'):
         if subdir.is_dir() and media_id in subdir.name:
             try:
-                # hardcoded english subtitles but just change en to whatever language you prefer, jp for japanese as an example.
-                shutil.copy2(str(subdir) + '\\en\\' + subtitles, str(media_path).replace(media_path.name, clean_title(media_path.name) + ' (' + year + ').srt'))
+                shutil.copy2(str(subdir) + '\\' + subtitle_language + '\\' + subtitles, str(media_path).replace(media_path.name, clean_title(media_path.name) + ' (' + year + ').srt'))
             except FileNotFoundError:
                 continue
 
@@ -41,7 +43,7 @@ def get_subtitles_show(media_path, media_id, season, episode):
     for subdir in subtitle_cache.glob('*'):
         if subdir.is_dir() and media_id in subdir.name:
             try:
-                shutil.copy2(str(subdir) + '\\Season ' + str(season_num) + '\\Episode ' + str(episode_num) + '\\en\\' + subtitles, str(media_path).replace(media_path.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + '.srt'))
+                shutil.copy2(str(subdir) + '\\Season ' + str(season_num) + '\\Episode ' + str(episode_num) + '\\en\\' + subtitles, str(media_path).replace(media_path.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.srt'))
             except FileNotFoundError:
                 continue
 
@@ -88,20 +90,27 @@ if not subtitle_cache.exists():
 
 for main in movieboxpro.glob('*'):
     if main.is_dir() and '_' in main.name:
+        if 'Subtitle_Cache' in main.name: continue
         media_id = main.name.rsplit('_', 1)[-1]
         for seasons in main.iterdir():
             if seasons.is_dir() and '_' in seasons.name:
-                for episodes in seasons.glob('*.mp4'):
-                    try:
-                        season_num, episode_num, episode_title, tpath = get_subtitles_show(episodes, media_id, re.search(r'\d+', seasons.name).group(), episodes.name.replace('.mp4', ''))
-                        print('Converting: ' + episodes.name, media_id, 'S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2), episode_title)
-                        if Path(tpath).is_file(): subs += 1
-                        shutil.copy2(str(episodes), str(episodes).replace(episodes.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.mp4'))
+                for episodes in seasons.glob('*'):
+                    if '.plist' in episodes.name:
                         os.remove(str(episodes))
-                        show += 1
-                    except FileExistsError:
                         continue
+                    elif '.mp4' in episodes.name:
+                        try:
+                            season_num, episode_num, episode_title, tpath = get_subtitles_show(episodes, media_id, re.search(r'\d+', seasons.name).group(), episodes.name.replace('.mp4', ''))
+                            print('Converting: ' + episodes.name, media_id, 'S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2), episode_title)
+                            if Path(tpath).is_file(): subs += 1
+                            shutil.copy2(str(episodes), str(episodes).replace(episodes.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.mp4'))
+                            os.remove(str(episodes))
+                            show += 1
+                        except FileExistsError:
+                            continue
                 seasons.rename(str(seasons).replace(seasons.name, 'Season ' + re.search(r'\d+', seasons.name).group().zfill(2)))
+        # unlike movies there is no actual way to retrieve the shows year from Download.db, so that will have to be manual still...
+        main.rename(str(main).replace(main.name, main.name.rsplit('_', 1)[0]))
     elif main.is_file() and '_' in main.name and '.mp4' in main.name:
         try:
             media_id = re.search(r'_(\d+)_\d+p', main.name).group(1)
