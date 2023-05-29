@@ -5,7 +5,7 @@ import sqlite3
 from pathlib import Path
 
 
-movieboxpro = Path('C:\\Users\\happy\\Videos\\MovieBoxPro\\batch3')
+movieboxpro = Path('C:\\Users\\happy\\Videos\\MovieBoxPro\\batch1')
 subtitle_cache = Path(str(movieboxpro) + '\\Subtitle_Cache\\Subtitle_My_Cache')
 download_database = str(movieboxpro) + '\\Download.db'
 movies, show, subs, index_errors, fileerrors = 0, 0, 0, 0, 0
@@ -43,7 +43,7 @@ def get_subtitles_show(media_path, media_id, season, episode):
     for subdir in subtitle_cache.glob('*'):
         if subdir.is_dir() and media_id in subdir.name:
             try:
-                shutil.copy2(str(subdir) + '\\Season ' + str(season_num) + '\\Episode ' + str(episode_num) + '\\en\\' + subtitles, str(media_path).replace(media_path.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.srt'))
+                shutil.copy2(str(subdir) + '\\Season ' + str(season_num) + '\\Episode ' + str(episode_num) + '\\' + subtitle_language + '\\' + subtitles, str(media_path).replace(media_path.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.srt'))
             except FileNotFoundError:
                 continue
 
