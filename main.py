@@ -47,7 +47,7 @@ def get_subtitles_show(media_path, media_id, season, episode):
             except FileNotFoundError:
                 continue
 
-    return season_num, episode_num, episode_title, str(media_path).replace(media_path.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + '.srt')
+    return season_num, episode_num, episode_title, str(media_path).replace(media_path.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.srt')
 
 
 def get_media_details(media_id, media_list, season_num = None, episode_num = None, is_tv=False):
