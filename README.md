@@ -10,10 +10,9 @@ You can determine if your device is compatible by checking out the [jailbreak wi
 Its entirely possible this will work with Android devices, but I don't have access to one and don't plan on getting one so you'll have to mess around yourself.
 
 MBPConv works by reading through the ***Download.db*** file location within the application documents directory of MovieBoxPro, and gathering the information required to format media files into a readable format.
-It also supports subtitles, which require the ***Subtitle_My_Cache*** directory to be copied over along with the ***Download.db***.
+It also supports subtitles, which require the ***Subtitle_Cache*** directory to be copied over along with the ***Download.db***.
 
-Both ***Download.db*** and ***Subtitle_My_Cache*** must be in the same folder as all the media you have downloaded, downloaded media can be found within the ***MBDownload*** directory within the application documents directory.
-***Subtitle_My_Cache*** must be renamed to subby, or whatever you decided to change it to within the script.
+Both ***Download.db*** and ***Subtitle_Cache*** must be in the same folder as all the media you have downloaded, downloaded media can be found within the ***MBDownload*** directory within the application documents directory.
 
 Using this script, it would turn the file downloaded from MovieBoxPro, "Man of Steel_1604_1080p.mp4" into "Man of Steel (2013).mp4" and would fetch the priortized subtitles for it.
 
