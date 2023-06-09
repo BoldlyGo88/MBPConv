@@ -5,10 +5,10 @@ import sqlite3
 from pathlib import Path
 
 
-movieboxpro = Path('D:\\batch2')
+movieboxpro = Path('D:\\batch6')
 subtitle_cache = Path(str(movieboxpro) + '\\Subtitle_Cache\\Subtitle_My_Cache')
 download_database = str(movieboxpro) + '\\Download.db'
-movies, show, subs, index_errors, fileerrors = 0, 0, 0, 0, 0
+movies, show, subs = 0, 0, 0
 
 # change subtitle language here, valid codes found here https://registry-page.isdcf.com/languages/
 subtitle_language = 'en'
@@ -102,9 +102,11 @@ for main in movieboxpro.glob('*'):
                         try:
                             season_num, episode_num, episode_title, tpath = get_subtitles_show(episodes, media_id, re.search(r'\d+', seasons.name).group(), episodes.name.replace('.mp4', ''))
                             print('Converting: ' + episodes.name, media_id, 'S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2), episode_title)
-                            if Path(tpath).is_file(): subs += 1
+                            if Path(tpath).is_file():
+                                subs += 1
+                            else:
+                                print('Subtitle Error: ', media_id, 'S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2), episode_title)
                             episodes.rename(str(episodes).replace(episodes.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.mp4'))
-                            #os.remove(str(episodes))
                             show += 1
                         except FileExistsError:
                             continue
@@ -130,8 +132,3 @@ print('\nMovies Converted: ' + str(movies))
 print('Episodes Converted: ' + str(show))
 print('Total Media Converted: ' + str(show + movies))
 print('Subtitles Found & Converted: ' + str(subs))
-if index_errors > 0:
-    print('Noted ' + str(index_errors) + ' indexing errors, please check that the media and subtitle files are working.')
-if fileerrors > 0:
-    print('Noted ' + str(fileerrors) + ' file errors, please check that the media and subtitle files are working.')
-    print('If you also received indexing errors and the values are equal, these can likely be ignored.')
