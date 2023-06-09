@@ -5,7 +5,7 @@ import sqlite3
 from pathlib import Path
 
 
-movieboxpro = Path('C:\\Users\\happy\\Videos\\MovieBoxPro\\batch1')
+movieboxpro = Path('D:\\batch2')
 subtitle_cache = Path(str(movieboxpro) + '\\Subtitle_Cache\\Subtitle_My_Cache')
 download_database = str(movieboxpro) + '\\Download.db'
 movies, show, subs, index_errors, fileerrors = 0, 0, 0, 0, 0
@@ -103,14 +103,17 @@ for main in movieboxpro.glob('*'):
                             season_num, episode_num, episode_title, tpath = get_subtitles_show(episodes, media_id, re.search(r'\d+', seasons.name).group(), episodes.name.replace('.mp4', ''))
                             print('Converting: ' + episodes.name, media_id, 'S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2), episode_title)
                             if Path(tpath).is_file(): subs += 1
-                            shutil.copy2(str(episodes), str(episodes).replace(episodes.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.mp4'))
-                            os.remove(str(episodes))
+                            episodes.rename(str(episodes).replace(episodes.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.mp4'))
+                            #os.remove(str(episodes))
                             show += 1
                         except FileExistsError:
                             continue
                 seasons.rename(str(seasons).replace(seasons.name, 'Season ' + re.search(r'\d+', seasons.name).group().zfill(2)))
         # unlike movies there is no actual way to retrieve the shows year from Download.db, so that will have to be manual still...
-        main.rename(str(main).replace(main.name, main.name.rsplit('_', 1)[0]))
+        try:
+            main.rename(str(main).replace(main.name, main.name.rsplit('_', 1)[0]))
+        except PermissionError:
+            continue
     elif main.is_file() and '_' in main.name and '.mp4' in main.name:
         try:
             media_id = re.search(r'_(\d+)_\d+p', main.name).group(1)
