@@ -27,12 +27,6 @@ With my testing i've come across a few bugs that aren't that much of a pain, but
 1. Bad/wrong subtitles
    - MovieBoxPro prioritizes subtitles usually on user feedback, some media especially older fail to have user feedback and will prioritize random subtitles or terrible subtitles. There is nothing in code I can do to fix this, but you can set correct priority within the MovieBoxPro application once the file is downloaded, but you'd need hindsight for this.
    - You can fix this post conversion by going to the movie folder within subby and just grabbing the correct/working .srt file.
-2. Index Errors
-   - You'll likely get several Index Errors, these usually don't mean anything other than the possibilty of you receiving bad/wrong subtitles, most times the subtitles do work so just test them.
-   - This happens when trying to read the subtitle index within ***Download.db*** and it can't be found, or the file isn't found.
-   - During my testing I was converting about 50 movies at a time and pretty regulary there would be 2 files that had an index error, even smaller chance that it was actually bad.
-3. File Errors
-   - If you received Indexing Errors you most likely received File Errors as well, just check the subtitles file and confirm its working or not, not the end of the world.
 
 During my testing (still on-going), in total I converted about 200 movies and 3 of them had bad subtitles/not working subtitles, so 1.5% were bad.
 
