@@ -26,7 +26,7 @@ With my testing i've come across a few bugs that aren't that much of a pain, but
 
 1. Bad/wrong subtitles
    - MovieBoxPro prioritizes subtitles usually on user feedback, some media especially older fail to have user feedback and will prioritize random subtitles or terrible subtitles. There is nothing in code I can do to fix this, but you can set correct priority within the MovieBoxPro application once the file is downloaded, but you'd need hindsight for this.
-   - You can fix this post conversion by going to the movie folder within subby and just grabbing the correct/working .srt file.
+   - You can fix this post conversion by going to the movie folder within ***Subtitles_Cache\Subtitles_My_Cache\*** and just grabbing the correct/working .srt file.
 2. m[18] is returning empty and subtitles aren't being found/prioritized/copied
    - This is normally user error, within MovieBoxPro settings the user must enable "Select Subtitle Automatically" under Playback.
 
