@@ -121,7 +121,10 @@ for main in movieboxpro.glob('*'):
             media_id = re.search(r'_(\d+)_\d+p', main.name).group(1)
             year, tpath = get_subtitles(main, media_id)
             print('Converting: ' + main.name, media_id, year.replace('(','').replace(')',''))
-            if Path(tpath).is_file(): subs += 1
+            if Path(tpath).is_file():
+                subs += 1
+            else:
+                print('Subtitle Error: ', media_id, clean_title(main.name), year.replace('(','').replace(')',''))
             main.rename(str(main).replace(main.name, clean_title(main.name) + year + '.mp4'))
             movies += 1
         except FileExistsError:
