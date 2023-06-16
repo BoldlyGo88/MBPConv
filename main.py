@@ -5,10 +5,10 @@ import sqlite3
 from pathlib import Path
 
 
-movieboxpro = Path('D:\\batch6')
+movieboxpro = Path('D:\\batch1')
 subtitle_cache = Path(str(movieboxpro) + '\\Subtitle_Cache\\Subtitle_My_Cache')
 download_database = str(movieboxpro) + '\\Download.db'
-movies, show, subs = 0, 0, 0
+movies, show, subs, suberror = 0, 0, 0, 0
 
 # change subtitle language here, valid codes found here https://registry-page.isdcf.com/languages/
 subtitle_language = 'en'
@@ -105,6 +105,7 @@ for main in movieboxpro.glob('*'):
                             if Path(tpath).is_file():
                                 subs += 1
                             else:
+                                suberror += 1
                                 print('Subtitle Error: ', media_id, 'S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2), episode_title)
                             episodes.rename(str(episodes).replace(episodes.name, re.sub(r'[?/:\\*<>|]', '', episode_title) + ' S' + str(season_num).zfill(2) + 'E' + str(episode_num).zfill(2) + '.mp4'))
                             show += 1
@@ -124,6 +125,7 @@ for main in movieboxpro.glob('*'):
             if Path(tpath).is_file():
                 subs += 1
             else:
+                suberror += 1
                 print('Subtitle Error: ', media_id, clean_title(main.name), year.replace('(','').replace(')',''))
             main.rename(str(main).replace(main.name, clean_title(main.name) + year + '.mp4'))
             movies += 1
@@ -134,4 +136,5 @@ for main in movieboxpro.glob('*'):
 print('\nMovies Converted: ' + str(movies))
 print('Episodes Converted: ' + str(show))
 print('Total Media Converted: ' + str(show + movies))
-print('Subtitles Found & Converted: ' + str(subs))
+print('\nSubtitles Found & Converted: ' + str(subs))
+print('Subtitle Errors: ' + str(suberror))
